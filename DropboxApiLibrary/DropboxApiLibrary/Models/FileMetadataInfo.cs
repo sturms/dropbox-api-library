@@ -23,12 +23,12 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// The file or folder full path.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Flag to check whether this is a file not folder metadata info.
         /// </summary>
         public bool IsFile
         {

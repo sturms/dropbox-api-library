@@ -38,7 +38,7 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Flag to check whether this is a file.
         /// </summary>
         public bool IsFile
         {

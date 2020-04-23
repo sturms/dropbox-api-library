@@ -12,7 +12,7 @@
     using dropboxApi = global::Dropbox.Api;
 
     /// <summary>
-    /// TODO: Add comment
+    /// Dropbox API commonly used enpoint calls.
     /// </summary>
     public class DropboxManager : IDropboxManager
     {
@@ -20,12 +20,14 @@
         private const string APP_ROOT_URI = "/Apps/MyFolder"; // Set your application root folder name
 
         /// <summary>
-        /// TODO: Add comment
+        /// Contains a list with downloaded files and its metadata.
+        /// Key: Dropbox file full URI,
+        /// Value: File metadata information.
         /// </summary>
         public static Dictionary<string, FileMetadataInfo> FilesToDownload = new Dictionary<string, FileMetadataInfo>();
 
         /// <summary>
-        /// TODO: Add comment
+        /// Currently downloading files count.
         /// </summary>
         public static int FilesToDownloadCount { get; set; }
 
@@ -52,13 +54,13 @@
         }
 
         /// <summary>
-        /// Loads the xml from dropbox
+        /// Loads the XML from dropbox.
         /// </summary>
         /// <remarks>
         /// https://content.dropboxapi.com/2/files/download?authorization=Bearer ACCESS_TOKEN&arg={"path": "/folder/filename.xml"}
         /// </remarks>
-        /// <param name="svcUri">service uri to xml file</param>
-        /// <returns>null if not exists or failed to load</returns>
+        /// <param name="svcUri">Service URI to XML file</param>
+        /// <returns>Null if not exists or failed to load</returns>
         public XmlDocument LoadXml(string svcUri)
         {
             svcUri = svcUri.ToUri();
@@ -77,10 +79,10 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Retrieves all the files that are within Dropbox folder by given URI.
         /// </summary>
-        /// <param name="svcFolderUri"></param>
-        /// <returns></returns>
+        /// <param name="svcFolderUri">Dropbox folder URI</param>
+        /// <returns>Result that contains list with file metadata</returns>
         public async Task<dropboxApi.Files.ListFolderResult> GetFilesInFolder(string svcFolderUri)
         {
             try
@@ -101,34 +103,11 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Gets the folder shared link which can be used, for example, 
+        /// to download folder as .zip archive.
         /// </summary>
-        /// <param name="svcUri"></param>
-        /// <returns></returns>
-        public async Task<dropboxApi.Files.Metadata> GetFileOrFolderMetadata(string svcUri)
-        {
-            try
-            {
-                dropboxApi.Files.Metadata result = null;
-
-                using (var client = new dropboxApi.DropboxClient(AccessToken))
-                {
-                    result = await client.Files.GetMetadataAsync(svcUri);
-                }
-
-                return result;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// TODO: Add comment
-        /// </summary>
-        /// <param name="svcUri"></param>
-        /// <returns></returns>
+        /// <param name="svcUri">Dropbox folder URI</param>
+        /// <returns>Folder shared link</returns>
         public async Task<string> GetFolderSharedLink(string svcUri)
         {
             try
@@ -154,10 +133,11 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Creates a folder within specified Dropbox relative directory where the
+        /// last part of this URI is the folder name.
         /// </summary>
-        /// <param name="svcUri"></param>
-        /// <returns></returns>
+        /// <param name="svcUri">Dropbox folder URI</param>
+        /// <returns>Metadata for the created folder</returns>
         public async Task<dropboxApi.Files.CreateFolderResult> CreateFolder(string svcUri)
         {
             try
@@ -176,12 +156,12 @@
                 return null;
             }
         }
-
+        
         /// <summary>
-        /// TODO: Add comment
+        /// Deletes file or folder by the specified Dropbox URI.
         /// </summary>
-        /// <param name="svcUri"></param>
-        /// <returns></returns>
+        /// <param name="svcUri">File or Folder URI</param>
+        /// <returns>Deleted file or folder metadata</returns>
         public async Task<dropboxApi.Files.DeleteResult> DeleteFileOrFolder(string svcUri)
         {
             try
@@ -202,36 +182,11 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Renames file or folder.
         /// </summary>
-        /// <param name="svcUri"></param>
-        /// <param name="revision"></param>
-        /// <returns></returns>
-        public async Task<dropboxApi.Files.FileMetadata> RestoreFileOrFolder(string svcUri, string revision)
-        {
-            try
-            {
-                dropboxApi.Files.FileMetadata result = null;
-
-                using (var client = new dropboxApi.DropboxClient(AccessToken))
-                {
-                    result = await client.Files.RestoreAsync(svcUri, revision);
-                }
-
-                return result;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// TODO: Add comment
-        /// </summary>
-        /// <param name="oldSvcUri"></param>
-        /// <param name="newSvcUri"></param>
-        /// <returns></returns>
+        /// <param name="oldSvcUri">Dropbox URI for the file or folder to rename</param>
+        /// <param name="newSvcUri">The Dropbox URI for new file or folder name</param>
+        /// <returns>Renamed file or folder metadata</returns>
         public async Task<dropboxApi.Files.RelocationResult> RenameFileOrFolder(string oldSvcUri, string newSvcUri)
         {
             try
@@ -252,12 +207,16 @@
         }
 
         /// <summary>
-        /// TODO: Add comment
+        /// Uploads the files from PC local directory to Dropbox folder.
         /// </summary>
-        /// <param name="svcPath"></param>
-        /// <param name="localDirPath"></param>
-        /// <param name="filePaths"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// When providing the 'filePaths' list where the file sub directory does not exist in Dropbox,
+        /// new folder will be automatically created in Dropbox.
+        /// </remarks>
+        /// <param name="svcPath">Dropbox folder URI where to upload files (Example: /app/UploadFolder)</param>
+        /// <param name="localDirPath">Path from where to upload files</param>
+        /// <param name="filePaths">File URIs (Example: [ "/app/UploadFolder/file.jpg", "/app/UploadFolder/SubFolder/file2.jpg" ] etc.)</param>
+        /// <returns>List with uploaded file metadata</returns>
         public async Task<List<dropboxApi.Files.FileMetadata>> UploadFiles(string svcPath, string localDirPath, List<string> filePaths)
         {
             var uploadResults = new List<dropboxApi.Files.FileMetadata>();
@@ -298,9 +257,92 @@
         }
 
         /// <summary>
-        /// Downloads files or folders from given service dir to specified local directory
+        /// Gets file or folder metadata (file size, creation time, extension etc.).
+        /// </summary>
+        /// <param name="svcUri">Dropbox URI for the file or folder</param>
+        /// <returns>File or folder metadata</returns>
+        public async Task<dropboxApi.Files.Metadata> GetFileOrFolderMetadata(string svcUri)
+        {
+            try
+            {
+                dropboxApi.Files.Metadata result = null;
+
+                using (var client = new dropboxApi.DropboxClient(AccessToken))
+                {
+                    result = await client.Files.GetMetadataAsync(svcUri);
+                }
+
+                return result;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Downloads a file by given Dropbox source URI to local directory.
+        /// </summary>
+        /// <param name="svcFileUri">Dropbox file URI</param>
+        /// <param name="localFilePath">Local directory where to download file</param>
+        /// <returns>True if file download went successfully, else False</returns>
+        public async Task<bool> DownloadFile(string svcFileUri, string localFilePath)
+        {
+            try
+            {
+                using (var client = new dropboxApi.DropboxClient(AccessToken))
+                {
+                    var result = await client.Files.DownloadAsync(svcFileUri);
+                    using (Stream sourceStream = await result.GetContentAsStreamAsync())
+                    using (FileStream source = File.Open(localFilePath, FileMode.Create))
+                    {
+                        await sourceStream.CopyToAsync(source);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Downloads a folder as a .zip archive.
+        /// </summary>
+        /// <param name="svcUri">Dropbox folder URI</param>
+        /// <param name="localFilePath">Local directory where to download the folder</param>
+        /// <returns>True if folder download went successfully, else False</returns>
+        public async Task<bool> DownloadFolder(string svcUri, string localFilePath)
+        {
+            try
+            {
+                string sharedFolderUrl = await this.GetFolderSharedLink(svcUri);
+                string fullPath = Path.Combine(localFilePath, $"{Path.GetFileName(svcUri)}.zip");
+
+                using (var webClient = new WebClient())
+                {
+                    await Task.Run(() =>
+                    {
+                        // dl=1 flag shows that folder will be downloaded as .zip archieve
+                        webClient.DownloadFile(new Uri(sharedFolderUrl.Replace("dl=0", "dl=1")), fullPath);
+                    });
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Downloads files or folders from given Dropbox URI to specified local directory.
         /// </summary>
         /// <param name="files">List with download file routes</param>
+        /// <param name="CompletedCallback">Callback delegate that is called on operation completion</param>
         public async Task Download(List<FileRequestInfo> files, Action<bool, bool> CompletedCallback)
         {
             // Resets download files count
@@ -327,66 +369,6 @@
                 }
 
                 CompletedCallback.Invoke(isDownloadSuccessful, false);
-            }
-        }
-
-        /// <summary>
-        /// TODO: Add comment
-        /// </summary>
-        /// <param name="svcUri"></param>
-        /// <param name="localFilePath"></param>
-        /// <returns></returns>
-        public async Task<bool> DownloadFolder(string svcUri, string localFilePath)
-        {
-            try
-            {
-                string sharedFolderUrl = await this.GetFolderSharedLink(svcUri);
-                string fullPath = Path.Combine(localFilePath, $"{Path.GetFileName(svcUri)}.zip");
-
-                using (var webClient = new WebClient())
-                {
-                    await Task.Run(() =>
-                    {
-                        // dl=1 flag shows that folder will be downloaded as .zip archieve
-                        webClient.DownloadFile(new Uri(sharedFolderUrl.Replace("dl=0", "dl=1")), fullPath);
-                    });
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// TODO: Add comment
-        /// </summary>
-        /// <param name="svcFileUri"></param>
-        /// <param name="localFilePath"></param>
-        /// <returns></returns>
-        public async Task<bool> DownloadFile(string svcFileUri, string localFilePath)
-        {
-            try
-            {
-                using (var client = new dropboxApi.DropboxClient(AccessToken))
-                {
-                    dropboxApi.Files.Metadata fileMetadata = await this.GetFileOrFolderMetadata(svcFileUri);
-                    var result = await client.Files.DownloadAsync(svcFileUri);
-
-                    using (Stream sourceStream = await result.GetContentAsStreamAsync())
-                    using (FileStream source = File.Open(localFilePath, FileMode.Create))
-                    {
-                        await sourceStream.CopyToAsync(source);
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
             }
         }
     }
